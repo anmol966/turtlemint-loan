@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFunnelStore } from "@/lib/store/funnel";
 import { fetchOffers, type Offer, type UnmatchedOffer } from "@/lib/api/offers";
@@ -48,6 +48,14 @@ const ELIGIBILITY_QUESTIONS = [
 type PageState = "quiz" | "loading" | "results" | "no-offers";
 
 export default function OffersPage() {
+  return (
+    <Suspense fallback={null}>
+      <OffersPageInner />
+    </Suspense>
+  );
+}
+
+function OffersPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("return");

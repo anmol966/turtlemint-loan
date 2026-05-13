@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Info } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -20,6 +20,14 @@ const GENDER_OPTIONS = [
 ] as const;
 
 export default function BasicDetailsPage() {
+  return (
+    <Suspense fallback={null}>
+      <BasicDetailsInner />
+    </Suspense>
+  );
+}
+
+function BasicDetailsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("return");
