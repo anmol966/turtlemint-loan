@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+:root {
+  /* Brand greens */
+  --tm-green-900: #0A4E3C;
+  --tm-green-700: #1B7A5A;
+  --tm-green-500: #2BB673;
+  --tm-green-300: #7DDDB0;
+  --tm-green-50:  #ECFAF3;
+
+  /* Neutrals */
+  --tm-ink-900:   #0B1320;
+  --tm-ink-700:   #2A3340;
+  --tm-ink-500:   #5C6675;
+  --tm-ink-300:   #B9C0CB;
+  --tm-ink-100:   #EEF1F5;
+  --tm-paper:     #FAFBFC;
+  --tm-white:     #FFFFFF;
+
+  /* Semantic */
+  --tm-success:   #22C55E;
+  --tm-warning:   #F59E0B;
+  --tm-danger:    #EF4444;
+  --tm-info:      #3B82F6;
+
+  /* Approval-chance ramp */
+  --tm-chance-high:    #16A34A;
+  --tm-chance-medium:  #F59E0B;
+  --tm-chance-low:     #EF4444;
+
+  /* Elevation */
+  --tm-shadow-sm:   0 1px 2px rgba(11, 19, 32, 0.04);
+  --tm-shadow-md:   0 4px 16px rgba(11, 19, 32, 0.06);
+  --tm-shadow-lg:   0 12px 32px rgba(11, 19, 32, 0.08);
+  --tm-shadow-glow: 0 8px 24px rgba(43, 182, 115, 0.18);
+
+  /* Radii */
+  --tm-r-sm:   8px;
+  --tm-r-md:   12px;
+  --tm-r-lg:   16px;
+  --tm-r-xl:   24px;
+  --tm-r-pill: 999px;
+
+  /* shadcn compat vars */
+  --background: var(--tm-paper);
+  --foreground: var(--tm-ink-900);
+  --card: var(--tm-white);
+  --card-foreground: var(--tm-ink-900);
+  --primary: var(--tm-green-500);
+  --primary-foreground: var(--tm-white);
+  --secondary: var(--tm-green-50);
+  --secondary-foreground: var(--tm-green-700);
+  --muted: var(--tm-ink-100);
+  --muted-foreground: var(--tm-ink-500);
+  --accent: var(--tm-green-50);
+  --accent-foreground: var(--tm-green-700);
+  --destructive: var(--tm-danger);
+  --border: var(--tm-ink-300);
+  --input: var(--tm-ink-300);
+  --ring: var(--tm-green-500);
+  --radius: var(--tm-r-md);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-jakarta);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid var(--tm-green-500);
+  outline-offset: 2px;
+}
+
+/* Tabular numerals for financial figures */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bureau fetch progress bar */
+@keyframes progress {
+  0% { width: 0%; }
+  60% { width: 75%; }
+  100% { width: 100%; }
+}
+
+/* Offer card stagger entrance */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Shimmer animation for skeletons */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--tm-ink-100) 25%,
+    #e8ecf0 50%,
+    var(--tm-ink-100) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--tm-r-sm);
+}
