@@ -176,7 +176,7 @@ function OffersPageInner() {
         {pageState === "results" && (
           <div aria-live="polite" aria-label={`${sorted.length} offers found`}>
             <SortBar value={sortKey} onChange={setSortKey} matchedCount={sorted.length} />
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {sorted.map((offer, idx) => (
                 <div
                   key={offer.lender.id}

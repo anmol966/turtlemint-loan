@@ -24,7 +24,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Button asChild size="xl">
               <Link href="/loan/personal">
-                Check My Eligibility <ArrowRight size={18} />
+                Check My Loan Eligibility <ArrowRight size={18} />
               </Link>
             </Button>
             <Button asChild size="xl" variant="outline">

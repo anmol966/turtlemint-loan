@@ -16,6 +16,8 @@ export type Lender = {
   usps: string[];
   disbursalTime: string;
   strictSelfEmployed?: boolean;
+  partPayment?: { headline: string; note?: string };
+  foreclosure?: { headline: string; note?: string };
 };
 
 export const LENDERS: Lender[] = [
@@ -36,6 +38,8 @@ export const LENDERS: Lender[] = [
     maxFee: 6,
     usps: ["Disbursal in 30 min", "No income docs for pre-approved", "Large loan amounts"],
     disbursalTime: "30 minutes",
+    partPayment: { headline: "Allowed after 6 EMIs", note: "Up to 25% of outstanding/year, free of charge" },
+    foreclosure: { headline: "Nil after 12 months", note: "4% on outstanding within 12 months" },
   },
   {
     id: "stashfin",
@@ -54,6 +58,8 @@ export const LENDERS: Lender[] = [
     maxFee: 6,
     usps: ["First 30 days interest-free", "Instant disbursal", "Thin-file friendly"],
     disbursalTime: "5–20 minutes",
+    partPayment: { headline: "Not Applicable" },
+    foreclosure: { headline: "5% on outstanding", note: "After completion of 3 EMIs" },
   },
   {
     id: "moneyview",
@@ -72,6 +78,8 @@ export const LENDERS: Lender[] = [
     maxFee: 8,
     usps: ["Lowest income threshold", "Fast 24-hour disbursal", "Tier-2/3 friendly"],
     disbursalTime: "24 hours",
+    partPayment: { headline: "4% for first 6 EMIs", note: "No charges after first 6 EMIs" },
+    foreclosure: { headline: "Not Applicable", note: "Full prepayment allowed any time" },
   },
   {
     id: "poonawalla",
@@ -91,6 +99,8 @@ export const LENDERS: Lender[] = [
     usps: ["Lowest interest rate from 9.99%", "Largest loan up to ₹50L", "Longest tenure up to 84 months"],
     disbursalTime: "Same day",
     strictSelfEmployed: true,
+    partPayment: { headline: "Nil charges", note: "Allowed after 6 EMIs, free of charge" },
+    foreclosure: { headline: "2% on outstanding", note: "Nil after 24 months" },
   },
   {
     id: "herofincorp",
@@ -110,6 +120,8 @@ export const LENDERS: Lender[] = [
     usps: ["Trusted Hero Group brand", "10-day cooling-off period", "No pre-closure charges if cancelled"],
     disbursalTime: "1–2 business days",
     strictSelfEmployed: true,
+    partPayment: { headline: "Allowed after 12 EMIs", note: "5% of part-payment amount" },
+    foreclosure: { headline: "Nil if cancelled in 10 days", note: "3% on outstanding otherwise" },
   },
   {
     id: "kissht",
@@ -128,6 +140,8 @@ export const LENDERS: Lender[] = [
     maxFee: 5,
     usps: ["Instant approval in 5 min", "100% digital", "Fast small-ticket loans"],
     disbursalTime: "5 minutes",
+    partPayment: { headline: "Not Applicable" },
+    foreclosure: { headline: "5% on outstanding", note: "Allowed after 6 EMIs" },
   },
 ];
 
