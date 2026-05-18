@@ -102,6 +102,13 @@ function matchLender(
     return { matched: true, offer: buildOffer(lender, profile, eligibility, 75, monthlyIncome) };
   }
 
+  if (creditScore == null) {
+    return {
+      matched: false,
+      reason: `Credit score unavailable — cannot evaluate eligibility`,
+    };
+  }
+
   if (creditScore < lender.minCreditScore) {
     return {
       matched: false,

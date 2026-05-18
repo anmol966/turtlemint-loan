@@ -108,7 +108,11 @@ function OffersPageInner() {
 
   function handleSelectLender(lenderId: string) {
     setSelectedLender(lenderId);
-    router.push(`/loan/personal/handoff?lender=${lenderId}`);
+    if (lenderId === "smfg") {
+      router.push("/loan/personal/apply/smfg");
+    } else {
+      router.push(`/loan/personal/handoff?lender=${lenderId}`);
+    }
   }
 
   const kfsOffer = useMemo(() =>
@@ -176,7 +180,7 @@ function OffersPageInner() {
         {pageState === "results" && (
           <div aria-live="polite" aria-label={`${sorted.length} offers found`}>
             <SortBar value={sortKey} onChange={setSortKey} matchedCount={sorted.length} />
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {sorted.map((offer, idx) => (
                 <div
                   key={offer.lender.id}

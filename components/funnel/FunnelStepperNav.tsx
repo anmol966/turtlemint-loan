@@ -10,7 +10,7 @@ const STEPS = [
 ];
 
 // Routes past the last stepper step — all stepper nodes render as done
-const POST_FUNNEL_PATHS = ["/loan/personal/handoff"];
+const POST_FUNNEL_PATHS = ["/loan/personal/handoff", "/loan/personal/apply"];
 
 export function FunnelStepperNav() {
   const pathname = usePathname();

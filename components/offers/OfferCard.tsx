@@ -80,28 +80,15 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 export function OfferCard({ lender, offer, onSelect, onViewKfs }: Props) {
   const [open, setOpen] = useState(false);
 
-  // Subtle brand-tinted background using the lender's color at ~6% opacity
-  const tintedBg = offer.bestMatch ? undefined : `${lender.brandColor}0D`;
-
   return (
     <div
       className={cn(
-        "rounded-[var(--tm-r-lg)] border transition-all overflow-hidden relative",
+        "rounded-[var(--tm-r-lg)] border transition-all overflow-hidden",
         offer.bestMatch
-          ? "border-[var(--tm-green-500)] border-2 ring-4 ring-[var(--tm-green-500)]/15 shadow-[var(--tm-shadow-md)] bg-gradient-to-br from-[var(--tm-green-50)] to-white"
-          : "border-[var(--tm-ink-100)] shadow-[var(--tm-shadow-md)] hover:shadow-[var(--tm-shadow-lg)] hover:-translate-y-0.5"
+          ? "border-[var(--tm-green-500)] border-2 shadow-[0_12px_40px_rgba(43,182,115,0.25)] bg-gradient-to-br from-[var(--tm-green-50)] to-white"
+          : "border-[var(--tm-ink-100)] shadow-[var(--tm-shadow-md)] bg-white hover:shadow-[var(--tm-shadow-lg)]"
       )}
-      style={offer.bestMatch ? undefined : { background: tintedBg }}
     >
-      {/* Brand-colored left accent strip (skipped for best match — green ribbon already differentiates it) */}
-      {!offer.bestMatch && (
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1.5"
-          style={{ background: lender.brandColor }}
-          aria-hidden="true"
-        />
-      )}
-
       {offer.bestMatch && (
         <div className="bg-[var(--tm-green-500)] text-white px-4 py-2 flex items-center gap-2">
           <Crown size={14} fill="white" />
@@ -112,7 +99,7 @@ export function OfferCard({ lender, offer, onSelect, onViewKfs }: Props) {
         </div>
       )}
 
-      <div className={cn("p-5 sm:p-6", !offer.bestMatch && "pl-6 sm:pl-7")}>
+      <div className="p-5 sm:p-6">
         {/* Header row: lender + approval */}
         <div className="flex items-start justify-between gap-3 mb-5">
           <div className="flex items-center gap-3 min-w-0">
@@ -166,30 +153,30 @@ export function OfferCard({ lender, offer, onSelect, onViewKfs }: Props) {
 
       {/* Expanded details */}
       {open && (
-        <div className="bg-[var(--tm-ink-900)] text-white px-5 sm:px-6 py-5">
+        <div className="bg-[var(--tm-green-50)]/60 border-t border-[var(--tm-ink-100)] px-5 sm:px-6 py-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-4">
             <div>
-              <p className="text-xs text-white/60 mb-1">Part Payment</p>
-              <p className="text-sm font-bold text-white mb-1">
+              <p className="text-[11px] font-semibold text-[var(--tm-ink-500)] uppercase tracking-wide mb-1">Part Payment</p>
+              <p className="text-sm font-bold text-[var(--tm-ink-900)] mb-1">
                 {lender.partPayment?.headline ?? "As per lender policy"}
               </p>
               {lender.partPayment?.note && (
-                <p className="text-[11px] text-white/70 leading-snug">{lender.partPayment.note}</p>
+                <p className="text-[11px] text-[var(--tm-ink-500)] leading-snug">{lender.partPayment.note}</p>
               )}
             </div>
             <div>
-              <p className="text-xs text-white/60 mb-1">Foreclosure</p>
-              <p className="text-sm font-bold text-white mb-1">
+              <p className="text-[11px] font-semibold text-[var(--tm-ink-500)] uppercase tracking-wide mb-1">Foreclosure</p>
+              <p className="text-sm font-bold text-[var(--tm-ink-900)] mb-1">
                 {lender.foreclosure?.headline ?? "As per lender policy"}
               </p>
               {lender.foreclosure?.note && (
-                <p className="text-[11px] text-white/70 leading-snug">{lender.foreclosure.note}</p>
+                <p className="text-[11px] text-[var(--tm-ink-500)] leading-snug">{lender.foreclosure.note}</p>
               )}
             </div>
             <div>
-              <p className="text-xs text-white/60 mb-1">Annual Percentage Rate</p>
-              <p className="text-sm font-bold text-white tabular-nums">{formatPercent(offer.apr)}</p>
-              <p className="text-[11px] text-white/70 leading-snug">
+              <p className="text-[11px] font-semibold text-[var(--tm-ink-500)] uppercase tracking-wide mb-1">Annual Percentage Rate</p>
+              <p className="text-sm font-bold text-[var(--tm-ink-900)] tabular-nums">{formatPercent(offer.apr)}</p>
+              <p className="text-[11px] text-[var(--tm-ink-500)] leading-snug">
                 Tenure {offer.tenure.min}–{offer.tenure.max} months
               </p>
             </div>
@@ -200,7 +187,7 @@ export function OfferCard({ lender, offer, onSelect, onViewKfs }: Props) {
               {offer.matchedReasons.map((r) => (
                 <span
                   key={r}
-                  className="text-[11px] bg-white/10 text-white/90 px-2 py-0.5 rounded-[var(--tm-r-pill)] font-medium"
+                  className="text-[11px] bg-white text-[var(--tm-green-700)] border border-[var(--tm-green-300)]/50 px-2 py-0.5 rounded-[var(--tm-r-pill)] font-medium"
                 >
                   {r}
                 </span>
@@ -208,11 +195,11 @@ export function OfferCard({ lender, offer, onSelect, onViewKfs }: Props) {
             </div>
           )}
 
-          <p className="text-xs text-white/70 leading-relaxed">
+          <p className="text-xs text-[var(--tm-ink-500)] leading-relaxed">
             For more details on charges and other loan terms, kindly refer to the{" "}
             <button
               onClick={() => onViewKfs(lender.id)}
-              className="text-[var(--tm-green-300)] underline font-medium hover:text-white"
+              className="text-[var(--tm-green-700)] underline font-medium hover:text-[var(--tm-green-500)]"
             >
               <FileText size={11} className="inline mr-0.5" />
               provisional KFS

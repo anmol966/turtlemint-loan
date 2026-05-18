@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  User, Phone, Mail, MapPin, CreditCard, TrendingUp, Calendar,
+  User, Phone, Mail, MapPin, CreditCard, Calendar,
   Briefcase, Wallet, Users, Pencil,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -114,13 +114,6 @@ export default function ProfilePage() {
       label: "PAN",
       value: bureau?.panMasked ?? "—",
     },
-    {
-      icon: <TrendingUp size={15} className="text-[var(--tm-ink-400)]" />,
-      label: "Existing obligations",
-      value: bureau?.existingObligations != null
-        ? `₹${bureau.existingObligations.toLocaleString("en-IN")}/mo`
-        : "—",
-    },
   ];
 
   function handleEditEligibility() {
@@ -129,7 +122,7 @@ export default function ProfilePage() {
   }
 
   function handleEditDetails() {
-    router.push("/loan/personal/basic-details?return=profile");
+    router.push("/profile/edit-details");
   }
 
   return (
@@ -152,15 +145,15 @@ export default function ProfilePage() {
           Your Profile
         </h1>
         <p className="text-sm text-[var(--tm-ink-500)] mb-6">
-          Data fetched from CIBIL during your session. Not stored on our servers.
+          Data fetched from the credit bureau during your session. Not stored on our servers.
         </p>
 
         {/* Credit score */}
-        {bureau && (
+        {bureau && bureau.creditScore != null && (
           <Card className="mb-5">
             <CardContent className="p-5 text-center">
               <p className="text-xs font-semibold text-[var(--tm-ink-500)] uppercase tracking-wide mb-1">
-                CIBIL Score
+                Credit Score
               </p>
               <ScoreGauge score={bureau.creditScore} />
             </CardContent>

@@ -97,26 +97,28 @@ export function UserMenu() {
             </div>
           </div>
 
-          <div className="px-4 py-3 border-b border-[var(--tm-ink-100)] flex items-center justify-between">
-            <span className="text-xs text-[var(--tm-ink-500)] font-medium">CIBIL Score</span>
-            <div className="flex items-center gap-2">
-              <span
-                className="text-sm font-bold tabular-nums"
-                style={{ color: scoreColor(bureau.creditScore) }}
-              >
-                {bureau.creditScore}
-              </span>
-              <span
-                className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[var(--tm-r-sm)]"
-                style={{
-                  color: scoreColor(bureau.creditScore),
-                  background: scoreColor(bureau.creditScore) + "18",
-                }}
-              >
-                {scoreLabel(bureau.creditScore)}
-              </span>
+          {bureau.creditScore != null && (
+            <div className="px-4 py-3 border-b border-[var(--tm-ink-100)] flex items-center justify-between">
+              <span className="text-xs text-[var(--tm-ink-500)] font-medium">Credit Score</span>
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-sm font-bold tabular-nums"
+                  style={{ color: scoreColor(bureau.creditScore) }}
+                >
+                  {bureau.creditScore}
+                </span>
+                <span
+                  className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[var(--tm-r-sm)]"
+                  style={{
+                    color: scoreColor(bureau.creditScore),
+                    background: scoreColor(bureau.creditScore) + "18",
+                  }}
+                >
+                  {scoreLabel(bureau.creditScore)}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="p-2">
             <Link
