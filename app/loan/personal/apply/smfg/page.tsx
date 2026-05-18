@@ -51,6 +51,50 @@ const BANKS = [
   "Yes Bank",
 ];
 
+const IFSC_BANK_BY_PREFIX: Record<string, string> = {
+  SBIN: "State Bank of India",
+  HDFC: "HDFC Bank",
+  ICIC: "ICICI Bank",
+  UTIB: "Axis Bank",
+  KKBK: "Kotak Mahindra Bank",
+  CNRB: "Canara Bank",
+  BARB: "Bank of Baroda",
+  PUNB: "Punjab National Bank",
+  IDFB: "IDFC FIRST Bank",
+  YESB: "Yes Bank",
+};
+
+async function compressImage(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const maxSide = 1600;
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+      if (Math.max(w, h) > maxSide) {
+        const r = maxSide / Math.max(w, h);
+        w = Math.round(w * r);
+        h = Math.round(h * r);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("canvas-context")); return; }
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("canvas-toBlob"))),
+        "image/jpeg",
+        0.85
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("image-load")); };
+    img.src = objectUrl;
+  });
+}
+
 function StageHeader({ stage }: { stage: Stage }) {
   const currentIdx = STAGE_GROUPS.findIndex((g) => g.stages.includes(stage));
   return (
@@ -162,21 +206,83 @@ export default function SmfgApplyPage() {
   const [acctNoConfirm, setAcctNoConfirm] = useState("");
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [proofFileName, setProofFileName] = useState<string | null>(null);
+  const [scanStatus, setScanStatus] = useState<"idle" | "scanning" | "ok" | "partial" | "error">("idle");
+  const [scanMessage, setScanMessage] = useState<string>("");
   const proofCameraRef = useRef<HTMLInputElement | null>(null);
   const proofFileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => () => { if (proofPreview) URL.revokeObjectURL(proofPreview); }, [proofPreview]);
 
-  function handleProofFile(file: File | null | undefined) {
+  async function handleProofFile(file: File | null | undefined) {
     if (!file) return;
     if (proofPreview) URL.revokeObjectURL(proofPreview);
     setProofPreview(URL.createObjectURL(file));
     setProofFileName(file.name);
+    setScanStatus("scanning");
+    setScanMessage("Reading your bank details…");
+
+    try {
+      const compressed = await compressImage(file);
+      const fd = new FormData();
+      fd.append("file", new File([compressed], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" }));
+      const res = await fetch("/api/scan-bank-doc", { method: "POST", body: fd });
+      const json = (await res.json()) as {
+        ifsc?: string | null;
+        accountNumber?: string | null;
+        bankName?: string | null;
+        error?: string;
+      };
+
+      if (!res.ok) {
+        setScanStatus("error");
+        setScanMessage(json.error ?? "Couldn't read the photo. Please enter details manually.");
+        return;
+      }
+
+      let filledIfsc = false;
+      let filledAcct = false;
+      let filledBank = false;
+      if (json.ifsc) {
+        setIfsc(json.ifsc);
+        filledIfsc = true;
+        const prefix = json.ifsc.slice(0, 4).toUpperCase();
+        const mapped = IFSC_BANK_BY_PREFIX[prefix];
+        if (mapped && BANKS.includes(mapped)) {
+          setBank(mapped);
+          filledBank = true;
+        }
+      }
+      if (json.accountNumber) {
+        setAcctNo(json.accountNumber);
+        setAcctNoConfirm(json.accountNumber);
+        filledAcct = true;
+      }
+
+      if (filledIfsc && filledAcct) {
+        setScanStatus("ok");
+        setScanMessage(`Filled IFSC${filledBank ? ", bank" : ""} and account number — please verify`);
+      } else if (filledIfsc || filledAcct) {
+        setScanStatus("partial");
+        setScanMessage(
+          filledIfsc
+            ? "Read the IFSC. Please enter the account number manually."
+            : "Read the account number. Please enter the IFSC manually."
+        );
+      } else {
+        setScanStatus("error");
+        setScanMessage("Couldn't read the photo. Please retake or enter manually.");
+      }
+    } catch {
+      setScanStatus("error");
+      setScanMessage("Couldn't process the photo. Please enter details manually.");
+    }
   }
   function clearProof() {
     if (proofPreview) URL.revokeObjectURL(proofPreview);
     setProofPreview(null);
     setProofFileName(null);
+    setScanStatus("idle");
+    setScanMessage("");
     if (proofCameraRef.current) proofCameraRef.current.value = "";
     if (proofFileRef.current) proofFileRef.current.value = "";
   }
@@ -531,10 +637,7 @@ export default function SmfgApplyPage() {
               <Camera size={18} className="text-[var(--tm-green-700)] flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-[var(--tm-ink-900)]">
-                  Auto-fill from your bank document
-                </p>
-                <p className="text-xs text-[var(--tm-ink-500)] leading-snug mt-0.5">
-                  Snap a clear photo and we&apos;ll read the IFSC and account number for you.
+                  Upload passbook or chequebook to autofill details
                 </p>
               </div>
             </div>
@@ -583,8 +686,15 @@ export default function SmfgApplyPage() {
                   <p className="text-xs font-semibold text-[var(--tm-ink-900)] truncate">
                     {proofFileName ?? "Image attached"}
                   </p>
-                  <p className="text-[11px] text-[var(--tm-ink-500)] mb-2">
-                    Reading details…
+                  <p className={cn(
+                    "text-[11px] mb-2 flex items-center gap-1 leading-snug",
+                    scanStatus === "ok" && "text-[var(--tm-green-700)]",
+                    scanStatus === "partial" && "text-[var(--tm-warning)]",
+                    scanStatus === "error" && "text-[var(--tm-danger)]",
+                    (scanStatus === "scanning" || scanStatus === "idle") && "text-[var(--tm-ink-500)]"
+                  )}>
+                    {scanStatus === "scanning" && <Loader2 size={11} className="animate-spin flex-shrink-0" />}
+                    <span>{scanMessage || "Image attached"}</span>
                   </p>
                   <div className="flex gap-2">
                     <button
