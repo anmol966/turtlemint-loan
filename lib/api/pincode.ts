@@ -1,23 +1,63 @@
-import { delay, MOCK_CONFIG } from "@/lib/mock/config";
-
-const PINCODE_MAP: Record<string, { city: string; state: string }> = {
-  "400001": { city: "Mumbai", state: "Maharashtra" },
-  "400051": { city: "Bandra", state: "Maharashtra" },
-  "110001": { city: "New Delhi", state: "Delhi" },
-  "110011": { city: "New Delhi", state: "Delhi" },
-  "560001": { city: "Bengaluru", state: "Karnataka" },
-  "600001": { city: "Chennai", state: "Tamil Nadu" },
-  "500001": { city: "Hyderabad", state: "Telangana" },
-  "700001": { city: "Kolkata", state: "West Bengal" },
-  "411001": { city: "Pune", state: "Maharashtra" },
-  "380001": { city: "Ahmedabad", state: "Gujarat" },
-  "302001": { city: "Jaipur", state: "Rajasthan" },
-  "226001": { city: "Lucknow", state: "Uttar Pradesh" },
+export type PincodeInfo = {
+  city: string;
+  district: string;
+  state: string;
 };
 
-export async function lookupPincode(
-  pin: string
-): Promise<{ city: string; state: string } | null> {
-  await delay(MOCK_CONFIG.PINCODE_DELAY_MS);
-  return PINCODE_MAP[pin] ?? null;
+type PostOffice = {
+  Name?: string;
+  District?: string;
+  State?: string;
+};
+type ApiResponse = Array<{ Status?: string; PostOffice?: PostOffice[] | null }>;
+
+const cache = new Map<string, PincodeInfo | null>();
+const inflight = new Map<string, Promise<PincodeInfo | null>>();
+
+function cleanPostOfficeName(raw: string | undefined): string {
+  if (!raw) return "";
+  return raw
+    .replace(/\s+(B\.?O|S\.?O|G\.?P\.?O|H\.?O|E\.?D\.?B\.?O|E\.?D\.?S\.?O)\.?$/i, "")
+    .trim();
+}
+
+export async function lookupPincode(pin: string): Promise<PincodeInfo | null> {
+  if (!/^\d{6}$/.test(pin)) return null;
+  if (cache.has(pin)) return cache.get(pin) ?? null;
+  const existing = inflight.get(pin);
+  if (existing) return existing;
+
+  const promise = (async () => {
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`, {
+        cache: "force-cache",
+      });
+      if (!res.ok) throw new Error(`pincode api ${res.status}`);
+      const data = (await res.json()) as ApiResponse;
+      const entry = Array.isArray(data) ? data[0] : null;
+      if (!entry || entry.Status !== "Success" || !entry.PostOffice?.length) {
+        cache.set(pin, null);
+        return null;
+      }
+      const po = entry.PostOffice[0];
+      const district = (po.District ?? "").trim();
+      const state = (po.State ?? "").trim();
+      const cityRaw = cleanPostOfficeName(po.Name);
+      const city = cityRaw || district;
+      if (!city || !state) {
+        cache.set(pin, null);
+        return null;
+      }
+      const info: PincodeInfo = { city, district, state };
+      cache.set(pin, info);
+      return info;
+    } catch {
+      return null;
+    } finally {
+      inflight.delete(pin);
+    }
+  })();
+
+  inflight.set(pin, promise);
+  return promise;
 }

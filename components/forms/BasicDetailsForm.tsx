@@ -57,11 +57,23 @@ export function BasicDetailsForm({ submitLabel = "Continue →", onSaved }: Prop
 
   useEffect(() => {
     if (!/^\d{6}$/.test(pincode)) { setCityState(null); return; }
+    let cancelled = false;
     setPincodeLoading(true);
     lookupPincode(pincode).then((res) => {
-      setCityState(res ? `${res.city}, ${res.state}` : null);
+      if (cancelled) return;
+      if (!res) {
+        setCityState(null);
+      } else {
+        const parts = [res.city];
+        if (res.district && res.district.toLowerCase() !== res.city.toLowerCase()) {
+          parts.push(res.district);
+        }
+        parts.push(res.state);
+        setCityState(parts.join(", "));
+      }
       setPincodeLoading(false);
     });
+    return () => { cancelled = true; };
   }, [pincode]);
 
   function handleDobChange(raw: string) {
