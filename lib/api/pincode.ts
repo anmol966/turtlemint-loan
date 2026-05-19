@@ -6,6 +6,7 @@ export type PincodeInfo = {
 
 type PostOffice = {
   Name?: string;
+  Block?: string;
   District?: string;
   State?: string;
 };
@@ -42,8 +43,9 @@ export async function lookupPincode(pin: string): Promise<PincodeInfo | null> {
       const po = entry.PostOffice[0];
       const district = (po.District ?? "").trim();
       const state = (po.State ?? "").trim();
-      const cityRaw = cleanPostOfficeName(po.Name);
-      const city = cityRaw || district;
+      const blockRaw = (po.Block ?? "").trim();
+      const block = blockRaw && blockRaw.toUpperCase() !== "NA" ? blockRaw : "";
+      const city = block || cleanPostOfficeName(po.Name) || district;
       if (!city || !state) {
         cache.set(pin, null);
         return null;
