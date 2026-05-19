@@ -64,11 +64,11 @@ export function BasicDetailsForm({ submitLabel = "Continue →", onSaved }: Prop
       if (!res) {
         setCityState(null);
       } else {
-        const parts = [res.city];
-        if (res.district && res.district.toLowerCase() !== res.city.toLowerCase()) {
-          parts.push(res.district);
+        const parts: string[] = [];
+        if (res.tehsil && res.tehsil.toLowerCase() !== res.district.toLowerCase()) {
+          parts.push(res.tehsil);
         }
-        parts.push(res.state);
+        parts.push(res.district, res.state);
         setCityState(parts.join(", "));
       }
       setPincodeLoading(false);

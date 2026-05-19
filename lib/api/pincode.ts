@@ -1,11 +1,10 @@
 export type PincodeInfo = {
-  city: string;
+  tehsil: string | null;
   district: string;
   state: string;
 };
 
 type PostOffice = {
-  Name?: string;
   Block?: string;
   District?: string;
   State?: string;
@@ -14,13 +13,6 @@ type ApiResponse = Array<{ Status?: string; PostOffice?: PostOffice[] | null }>;
 
 const cache = new Map<string, PincodeInfo | null>();
 const inflight = new Map<string, Promise<PincodeInfo | null>>();
-
-function cleanPostOfficeName(raw: string | undefined): string {
-  if (!raw) return "";
-  return raw
-    .replace(/\s+(B\.?O|S\.?O|G\.?P\.?O|H\.?O|E\.?D\.?B\.?O|E\.?D\.?S\.?O)\.?$/i, "")
-    .trim();
-}
 
 export async function lookupPincode(pin: string): Promise<PincodeInfo | null> {
   if (!/^\d{6}$/.test(pin)) return null;
@@ -44,13 +36,12 @@ export async function lookupPincode(pin: string): Promise<PincodeInfo | null> {
       const district = (po.District ?? "").trim();
       const state = (po.State ?? "").trim();
       const blockRaw = (po.Block ?? "").trim();
-      const block = blockRaw && blockRaw.toUpperCase() !== "NA" ? blockRaw : "";
-      const city = block || cleanPostOfficeName(po.Name) || district;
-      if (!city || !state) {
+      const tehsil = blockRaw && blockRaw.toUpperCase() !== "NA" ? blockRaw : null;
+      if (!district || !state) {
         cache.set(pin, null);
         return null;
       }
-      const info: PincodeInfo = { city, district, state };
+      const info: PincodeInfo = { tehsil, district, state };
       cache.set(pin, info);
       return info;
     } catch {
